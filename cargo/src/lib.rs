@@ -182,10 +182,6 @@ impl Machine {
         self.goto(self.reg(r1)?)
     }
 
-    fn dsc_SET_IV(&mut self, i: u8, v: u8) -> Result<(), &'static str> {
-
-    }
-
     //non-instructions
     fn mem(&self, i: u8) -> Result<u8, &'static str> { //return val at index
         unimplemented!()
