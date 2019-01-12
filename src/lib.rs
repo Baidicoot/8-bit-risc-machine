@@ -4,13 +4,13 @@ fn u8ify(b: bool) -> u8 {
 
 pub struct Machine {
     mem: [[u8; 256]; 4], //four port memory: port 1 is RAM and input/output, port 2 is the removable disc, the rest is the hard drive
-    reg: [u8; 16],
+    registers: [u8; 16],
     prgcount: u8, //index on disc
     dsccount: u8, //current disc
 }
 
 fn run_disc(program: String) {
-    let mut vm = Machine { mem: [[0; 256]; 4], reg: [0; 16], prgcount: 0, prgdisc: 0, };
+    let mut vm = Machine { mem: [[0; 256]; 4], registers: [0; 16], prgcount: 0, dsccount: 0, };
     fn parseByte(x: &str) -> u8 {
         u8::from_str_radix(x, 2).unwrap()
     }
@@ -35,19 +35,19 @@ impl Machine {
     }
 
     fn ram_SAV_RV(&mut self, r1: u8, v: u8, d: u8) -> Result<(), &'static str> { //saves v to index at register r1
-        self.sav(d, i, v)
+        self.sav(d, self.reg(r1)?, v)
     }
 
     fn ram_SAV_RR(&mut self, r1: u8, r2: u8, d: u8) -> Result<(), &'static str> { //saves val at register r2 to index at register r1
-        self.sav(d, i, self.reg(r)?)
+        self.sav(d, self.reg(r1)?, self.reg(r2)?)
     }
 
     fn ram_LOAD_IR(&mut self, i: u8, r: u8, d: u8) -> Result<(), &'static str> { //loads a val at an index to a register
-        self.set(d, r, self.mem(i)?)
+        self.set(r, self.mem(d, i)?)
     }
 
     fn ram_LOAD_RR(&mut self, r1: u8, r2: u8, d: u8) -> Result<(), &'static str> { //loads a val at an index to a register
-        self.set(d, r, self.mem(i)?)
+        self.set(r2, self.mem(d, r2)?)
     }
 
     fn alu_SUB_RV(&mut self, r: u8, v: u8) -> Result<(), &'static str> {
@@ -180,36 +180,36 @@ impl Machine {
 
     //non-instructions
     fn mem(&self, d: u8, i: u8) -> Result<u8, &'static str> { //return val at index
-        let d = self.getdsc(d);
-        if let Some(x) = self.mem.get_mut(r) {
-            Ok(*x[i as usize])
+        let d = self.getdsc(d)?;
+        if {d < 4} {
+            Ok(self.mem[d as usize][i as usize])
         } else {
             Err("Failed to set memory: Disc does not exist.")
         }
     }
 
     fn sav(&mut self, d: u8, i: u8, v: u8) -> Result<(), &'static str> { //save at index
-        let d = self.getdsc(d);
-        if let Some(x) = self.mem.get_mut(r) {
-            *x[i as usize] = v;
-            Ok()
+        let d = self.getdsc(d)?;
+        if {d < 4} {
+            self.mem[d as usize][i as usize] = v;
+            Ok(())
         } else {
             Err("Failed to set memory: Disc does not exist.")
         }
     }
 
     fn reg(&self, r: u8) -> Result<u8, &'static str> { //return val at register
-        if let Some(x) = self.reg.get_mut(r) {
-            Ok(x)
+        if {r < 16} {
+            Ok(self.registers[r as usize])
         } else {
             Err("Failed to get register: Register does not exist.")
         }
     }
 
     fn set(&mut self, r: u8, v: u8) -> Result<(), &'static str> { //set register
-        if let Some(x) = self.reg.get_mut(r) {
-            *x = v;
-            Ok()
+        if {r < 16} {
+            self.registers[r as usize] = v;
+            Ok(())
         } else {
             Err("Failed to set register: Register does not exist.")
         }
@@ -221,12 +221,12 @@ impl Machine {
 
     fn goto(&mut self, i: u8) -> Result<(), &'static str> { //set program pos (byte; not word)
         self.prgcount = i;
-        Ok()
+        Ok(())
     }
 
     fn godsc(&mut self, v: u8) -> Result<(), &'static str> { //set program disc
         self.dsccount = self.getdsc(v)?;
-        Ok()
+        Ok(())
     }
 
     fn getdsc(&self, d: u8) -> Result<u8, &'static str> { //get disc
