@@ -1,12 +1,12 @@
 fn u8ify(b: bool) -> u8 {
-    if b {255} else {0}
+    if b {1} else {0}
 }
 
 pub struct Machine {
     mem: [[u8; 256]; 4], //four port memory: port 1 is RAM and input/output, port 2 is the removable disc, the rest is the hard drive
     reg: [u8; 16],
     prgcount: u8, //index on disc
-    prgdisc: u8, //port ('disc') currently running from
+    dsccount: u8, //current disc
 }
 
 fn run_disc(program: String) {
@@ -26,32 +26,28 @@ impl Machine {
     //VAL USE is two letters in sucession showing how the parameters are used;
     //e.g. VR uses a program-specified value and a register;
     //letters can be V, R, I (index)
-    fn esc_INTRPT_CV(&mut self, c: u8, v: u8) -> Result<(), &'static str> {
-        unimplemented!()
+    fn ram_SAV_IV(&mut self, i: u8, v: u8, d: u8) -> Result<(), &'static str> { //saves v to index i
+        self.sav(d, i, v)
     }
 
-    fn esc_INTRPT_CR(&mut self, c: u8, r: u8) -> Result<(), &'static str> {
-        self.esc_INTRPT_CR(c, self.reg(r)?)
+    fn ram_SAV_IR(&mut self, i: u8, r: u8, d: u8) -> Result<(), &'static str> { //saves val at register r to index i
+        self.sav(d, i, self.reg(r)?)
     }
 
-    fn ram_SAV_IV(&mut self, i: u8, v: u8) -> Result<(), &'static str> {
-        self.sav(i, v)
+    fn ram_SAV_RV(&mut self, r1: u8, v: u8, d: u8) -> Result<(), &'static str> { //saves v to index at register r1
+        self.sav(d, i, v)
     }
 
-    fn ram_SAV_IR(&mut self, i: u8, r: u8) -> Result<(), &'static str> {
-        self.sav(i, self.reg(r)?)
+    fn ram_SAV_RR(&mut self, r1: u8, r2: u8, d: u8) -> Result<(), &'static str> { //saves val at register r2 to index at register r1
+        self.sav(d, i, self.reg(r)?)
     }
 
-    fn ram_LOAD_IR(&mut self, i: u8, r: u8) -> Result<(), &'static str> {
-        self.set(r, self.mem(i)?)
+    fn ram_LOAD_IR(&mut self, i: u8, r: u8, d: u8) -> Result<(), &'static str> { //loads a val at an index to a register
+        self.set(d, r, self.mem(i)?)
     }
 
-    fn ram_SET_RV(&mut self, rin: u8, v: u8) -> Result<(), &'static str> {
-        self.set(rin, v)
-    }
-
-    fn ram_SET_RR(&mut self, rin: u8, rout: u8) -> Result<(), &'static str> {
-        self.set(rin, self.reg(rout)?)
+    fn ram_LOAD_RR(&mut self, r1: u8, r2: u8, d: u8) -> Result<(), &'static str> { //loads a val at an index to a register
+        self.set(d, r, self.mem(i)?)
     }
 
     fn alu_SUB_RV(&mut self, r: u8, v: u8) -> Result<(), &'static str> {
@@ -154,65 +150,87 @@ impl Machine {
         self.set(0, u8ify(self.reg(r1)?!=self.reg(r2)?))
     }
 
-    fn goto_ZRO_RI(&mut self, r1: u8, i: u8) -> Result<(), &'static str> {
+    fn goto_ZRO_RI(&mut self, r1: u8, i: u8, d: u8) -> Result<(), &'static str> { //goto i if @r1 is 0
         if (self.reg(r1)?==0) {self.goto(i)?};
         Ok(())
     }
 
-    fn goto_ZRO_RR(&mut self, r1: u8, r2: u8) -> Result<(), &'static str> {
+    fn goto_ZRO_RR(&mut self, r1: u8, r2: u8, d: u8) -> Result<(), &'static str> { //goto @r2 if @r1 is 0
         if (self.reg(r1)?==0) {self.goto(self.reg(r2)?)?};
         Ok(())
     }
 
-    fn goto_NZRO_RI(&mut self, r1: u8, i: u8) -> Result<(), &'static str> {
+    fn goto_NZRO_RI(&mut self, r1: u8, i: u8, d: u8) -> Result<(), &'static str> { //goto i if @r1 is 0
         if (self.reg(r1)?!=0) {self.goto(i)?};
         Ok(())
     }
 
-    fn goto_NZRO_RR(&mut self, r1: u8, r2: u8) -> Result<(), &'static str> {
+    fn goto_NZRO_RR(&mut self, r1: u8, r2: u8, d: u8) -> Result<(), &'static str> { //goto @r2 if @r1 is 0
         if (self.reg(r1)?!=0) {self.goto(self.reg(r2)?)?};
         Ok(())
     }
 
-    fn goto_UNCON_IV(&mut self, i: u8, v: u8) -> Result<(), &'static str> {
+    fn goto_UNCON_I(&mut self, i: u8, d: u8) -> Result<(), &'static str> { //goto i
         self.goto(i)
     }
 
-    fn goto_UNCON_RV(&mut self, r1: u8, v: u8) -> Result<(), &'static str> {
-        self.goto(self.reg(r1)?)
+    fn goto_UNCON_R(&mut self, r: u8, d: u8) -> Result<(), &'static str> { //goto @r
+        self.goto(self.reg(r)?)
     }
 
     //non-instructions
-    fn mem(&self, i: u8) -> Result<u8, &'static str> { //return val at index
-        unimplemented!()
+    fn mem(&self, d: u8, i: u8) -> Result<u8, &'static str> { //return val at index
+        let d = self.getdsc(d);
+        if let Some(x) = self.mem.get_mut(r) {
+            Ok(*x[i as usize])
+        } else {
+            Err("Failed to set memory: Disc does not exist.")
+        }
     }
 
-    fn sav(&mut self, i: u8, v: u8) -> Result<(), &'static str> { //save at index
-        unimplemented!()
+    fn sav(&mut self, d: u8, i: u8, v: u8) -> Result<(), &'static str> { //save at index
+        let d = self.getdsc(d);
+        if let Some(x) = self.mem.get_mut(r) {
+            *x[i as usize] = v;
+            Ok()
+        } else {
+            Err("Failed to set memory: Disc does not exist.")
+        }
     }
 
     fn reg(&self, r: u8) -> Result<u8, &'static str> { //return val at register
-        unimplemented!()
+        if let Some(x) = self.reg.get_mut(r) {
+            Ok(x)
+        } else {
+            Err("Failed to get register: Register does not exist.")
+        }
     }
 
     fn set(&mut self, r: u8, v: u8) -> Result<(), &'static str> { //set register
-        unimplemented!()
+        if let Some(x) = self.reg.get_mut(r) {
+            *x = v;
+            Ok()
+        } else {
+            Err("Failed to set register: Register does not exist.")
+        }
     }
 
     fn pos(&mut self) -> Result<u8, &'static str> { //get current program pos (byte; not word)
-        unimplemented!()
+        Ok(self.prgcount)
     }
 
     fn goto(&mut self, i: u8) -> Result<(), &'static str> { //set program pos (byte; not word)
-        unimplemented!()
+        self.prgcount = i;
+        Ok()
     }
 
-    fn disc(&mut self) -> Result<u8, &'static str> { //get current disc
-        unimplemented!()
+    fn godsc(&mut self, v: u8) -> Result<(), &'static str> { //set program disc
+        self.dsccount = self.getdsc(v)?;
+        Ok()
     }
 
-    fn gocd(&mut self, i: u8) -> Result<(), &'static str> { //set program disc
-        unimplemented!()
+    fn getdsc(&self, d: u8) -> Result<u8, &'static str> { //get disc
+        if {d==0} {Ok(self.dsccount)} else {Ok(d-1)}
     }
 
 }
