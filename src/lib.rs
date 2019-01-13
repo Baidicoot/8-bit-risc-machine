@@ -12,7 +12,7 @@ pub struct Machine {
     dsccount: u8, //current disc
 }
 
-fn run_disc(program: Vec<String>) {
+fn run(program: Vec<String>) {
     let mut vm = Machine { mem: [[0; 256]; DISCS], registers: [0; REGISTERS], prgcount: 0, dsccount: 0, };
     fn parse_byte(x: &str) -> u8 {
         u8::from_str_radix(x, 2).unwrap()
