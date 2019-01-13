@@ -2,19 +2,8 @@ fn u8ify(b: bool) -> u8 {
     if b {1} else {0}
 }
 
-fn makeLen(mut v: Vec<u8>, l: usize) -> Vec<u8> {
-    if {v.len() == l} {v}
-    else if {v.len() > l} {v[0..l].to_vec()}
-    else {
-        for i in 0..l-v.len() {
-            v.push(0);
-        }
-        v
-    }
-}
-
 pub const DISCS: usize = 8;
-pub const REGISTERS: usize = 8;
+pub const REGISTERS: usize = DISCS; //because they have to be accessable in the same number of bytes
 
 pub struct Machine {
     mem: [[u8; 256]; DISCS], //four port memory: port 1 is RAM and input/output, port 2 is the removable disc, the rest is the hard drive
@@ -23,12 +12,33 @@ pub struct Machine {
     dsccount: u8, //current disc
 }
 
-fn run_disc(program: String) {
+fn run_disc(program: Vec<String>) {
     let mut vm = Machine { mem: [[0; 256]; DISCS], registers: [0; REGISTERS], prgcount: 0, dsccount: 0, };
-    fn parseByte(x: &str) -> u8 {
+    fn parse_byte(x: &str) -> u8 {
         u8::from_str_radix(x, 2).unwrap()
     }
-    let prg: Vec<u8> = makeLen(program.split(" ").map(parseByte).collect(), 256);
+    fn make_len(mut v: Vec<u8>, l: usize) -> Vec<u8> {
+        if {v.len() == l} {v}
+        else if {v.len() > l} {v[0..l].to_vec()}
+        else {
+            for i in 0..l-v.len() {
+                v.push(0);
+            }
+            v
+        }
+    }
+    fn format(bytes: Vec<u8>) -> [u8; 256] {
+        let mut array = [0; 256];
+        array.copy_from_slice(&bytes[..256]);
+        array
+    }
+    fn load_disc(program: String, mut vm: Machine, dsc: u8) -> Result<(), &'static str> {
+        if {dsc as usize >= DISCS} {
+            return Err("Failed to set memory: Disc does not exist.");
+        }
+         vm.mem[dsc as usize] = format(make_len(program.split(" ").map(parse_byte).collect(), 256));
+         Ok(())
+    }
 }
 
 impl Machine {
