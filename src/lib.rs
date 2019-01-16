@@ -5,7 +5,7 @@ fn u8ify(b: bool) -> u8 {
 pub const DISCS: usize = 8;
 pub const REGISTERS: usize = DISCS; //because they have to be accessable in the same number of bytes
 
-pub struct Machine {
+struct Machine {
     mem: [[u8; 256]; DISCS], //four port memory: port 1 is RAM and input/output, port 2 is the removable disc, the rest is the hard drive
     registers: [u8; REGISTERS],
     prgcount: u8, //index on disc
@@ -13,7 +13,7 @@ pub struct Machine {
     isactive: bool, //is it on or not?
 }
 
-fn run(program: Vec<String>) ->Result<(), &'static str> {
+pub fn run(program: Vec<String>) ->Result<(), &'static str> {
     let mut vm = Machine { mem: [[0; 256]; DISCS], registers: [0; REGISTERS], prgcount: 0, dsccount: 0, isactive: true, };
     fn parse_byte(x: &str) -> u8 {
         u8::from_str_radix(x, 2).unwrap()
@@ -88,10 +88,10 @@ fn run(program: Vec<String>) ->Result<(), &'static str> {
             0b10010000 ... 0b10010111 => vm.goto_ZRO_DRR(ins[1], ins[2], ins[0]&0b00000111)?,
             0b10011000 ... 0b10011111 => vm.goto_ZRO_RRI(ins[1], ins[2], ins[0]&0b00000111)?,
             0b10100000 ... 0b10100111 => vm.goto_ZRO_RRR(ins[1], ins[2], ins[0]&0b00000111)?,
-            0b10101000 ... 0b10001111 => vm.goto_NZRO_DRI(ins[1], ins[2], ins[0]&0b00000111)?,
-            0b10110000 ... 0b10010111 => vm.goto_NZRO_DRR(ins[1], ins[2], ins[0]&0b00000111)?,
-            0b10111000 ... 0b10011111 => vm.goto_NZRO_RRI(ins[1], ins[2], ins[0]&0b00000111)?,
-            0b11000000 ... 0b10100111 => vm.goto_NZRO_RRR(ins[1], ins[2], ins[0]&0b00000111)?,
+            0b10101000 ... 0b10101111 => vm.goto_NZRO_DRI(ins[1], ins[2], ins[0]&0b00000111)?,
+            0b10110000 ... 0b10110111 => vm.goto_NZRO_DRR(ins[1], ins[2], ins[0]&0b00000111)?,
+            0b10111000 ... 0b10111111 => vm.goto_NZRO_RRI(ins[1], ins[2], ins[0]&0b00000111)?,
+            0b11000000 ... 0b11000111 => vm.goto_NZRO_RRR(ins[1], ins[2], ins[0]&0b00000111)?,
             _ => vm.end_END()?
         }
         let output_char = vm.mem(4, 0)? as char;
