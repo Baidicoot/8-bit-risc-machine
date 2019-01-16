@@ -5,4 +5,3 @@ authors = ["Baidicoot/Aidan Ewart"]
 edition = "2018"
 
 [dependencies]
-backtrace = "*"
