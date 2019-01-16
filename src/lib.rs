@@ -39,7 +39,7 @@ pub fn run(program: Vec<String>) ->Result<(), &'static str> {
         array
     }
     for (i, v) in program.iter().enumerate() {
-        vm.loaddsc(i as u8, format(make_len(v.split(|d| (d == ' ') || (d == '\n') || (d == '\r')).filter(|b| b.len() > 0).map(parse_byte).collect(), 256)))?;
+        vm.loaddsc(i as u8, format(make_len(v.split(|d| (d == ' ') || (d == '\n') || (d == '\r')).filter(|b| (b.len() > 0)).map(parse_byte).collect(), 256)))?;
         if {i > 2} {
             break
         }
