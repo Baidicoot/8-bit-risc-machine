@@ -94,6 +94,8 @@ fn run(program: Vec<String>) ->Result<(), &'static str> {
             0b11000000 ... 0b10100111 => vm.goto_NZRO_RRR(ins[1], ins[2], ins[0]&0b00000111)?,
             _ => vm.end_END()?
         }
+        let output_char = vm.mem(4, 0)? as char;
+        print!("{}", output_char);
     }
     Ok(())
 }
