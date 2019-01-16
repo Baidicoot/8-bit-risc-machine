@@ -3,10 +3,10 @@ extern crate risc_vm;
 use std::{fs, process, env};
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let args: Vec<String> = vec![String::from("example.vmc.txt")];
     let discs: Vec<String> = args
         .iter()
-        .map(|path| fs::read_to_string(path)
+        .map(|path| fs::read_to_string(&path)
             .unwrap_or_else(|err| {
                 println!("ERROR parsing arguments: {}", err);
                 process::exit(1);
