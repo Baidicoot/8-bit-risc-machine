@@ -3,7 +3,7 @@ extern crate risc_vm;
 use std::{fs, process, env};
 
 fn main() {
-    let args: Vec<String> = vec![String::from("example.vmc.txt")];
+    let args: Vec<String> = vec![String::from("example.vmc")];
     let discs: Vec<String> = args
         .iter()
         .map(|path| fs::read_to_string(&path)
