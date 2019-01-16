@@ -1,3 +1,5 @@
+use std::process;
+
 fn u8ify(b: bool) -> u8 {
     if b {1} else {0}
 }
@@ -16,7 +18,10 @@ struct Machine {
 pub fn run(program: Vec<String>) ->Result<(), &'static str> {
     let mut vm = Machine { mem: [[0; 256]; DISCS], registers: [0; REGISTERS], prgcount: 0, dsccount: 0, isactive: true, };
     fn parse_byte(x: &str) -> u8 {
-        u8::from_str_radix(x, 2).unwrap()
+        u8::from_str_radix(x, 2).unwrap_or_else(|err| {
+            println!("Program ERROR: Couldn't parse {:?} to byte.", x);
+            process::exit(3);
+        })
     }
     fn make_len(mut v: Vec<u8>, l: usize) -> Vec<u8> { //code for formatting program
         if {v.len() == l} {v}
@@ -34,7 +39,7 @@ pub fn run(program: Vec<String>) ->Result<(), &'static str> {
         array
     }
     for (i, v) in program.iter().enumerate() {
-        vm.loaddsc(i as u8, format(make_len(v.split(|d| (d == ' ') || (d == '\n')).map(parse_byte).collect(), 256)))?;
+        vm.loaddsc(i as u8, format(make_len(v.split(|d| (d == ' ') || (d == '\n') || (d == '\r')).map(parse_byte).collect(), 256)))?;
         if {i > 2} {
             break
         }
