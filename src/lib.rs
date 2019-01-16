@@ -39,13 +39,14 @@ pub fn run(program: Vec<String>) ->Result<(), &'static str> {
         array
     }
     for (i, v) in program.iter().enumerate() {
-        vm.loaddsc(i as u8, format(make_len(v.split(|d| (d == ' ') || (d == '\n') || (d == '\r')).map(parse_byte).collect(), 256)))?;
+        vm.loaddsc(i as u8, format(make_len(v.split(|d| (d == ' ') || (d == '\n') || (d == '\r')).filter(|b| b.len() > 0).map(parse_byte).collect(), 256)))?;
         if {i > 2} {
             break
         }
     }
     while {vm.isactive} {
         let ins: [u8; 3] = [vm.mem(vm.dsccount, vm.prgcount)?, vm.mem(vm.dsccount, vm.prgcount+1)?, vm.mem(vm.dsccount, vm.prgcount+2)?];
+        //println!("Initiating instruction: {:?} {:?} {:?} at position: {:?} {:?}", ins[0], ins[1], ins[2], vm.dsccount, vm.prgcount);
         match ins[0] {
             0b00000000 => vm.end_END()?,
             0b00001000 ... 0b00001111 => vm.ram_SAV_DIV(ins[1], ins[2], ins[0]&0b00000111)?,
@@ -103,6 +104,7 @@ pub fn run(program: Vec<String>) ->Result<(), &'static str> {
             print!("{}", vm.mem(4, 0)? as char);
             vm.sav(4, 1, 0)?;
         }
+        vm.next_ins()?;
     }
     Ok(())
 }
@@ -379,6 +381,11 @@ impl Machine {
 
     fn loaddsc(&mut self, d: u8, f: [u8; 256]) -> Result<(), &'static str> {
         self.mem[self.getdsc(d)? as usize] = f;
+        Ok(())
+    }
+
+    fn next_ins(&mut self) -> Result<(), &'static str> {
+        self.prgcount += 3;
         Ok(())
     }
 
