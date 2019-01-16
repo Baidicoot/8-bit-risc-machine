@@ -1,5 +1,5 @@
 [package]
-name = "8-bit-vm"
+name = "risc_vm"
 version = "0.1.1"
 authors = ["Baidicoot/Aidan Ewart"]
 edition = "2018"

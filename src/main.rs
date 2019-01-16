@@ -1,22 +1,20 @@
-use std::fs;
+extern crate risc_vm;
 
-pub struct Config {
-    path: String
-}
-
-impl Config {
-    pub fn from_args(mut args: std::env::Args) -> Result<Config, &'static str> {
-        args.next();
-
-        let path = match args.next() {
-            Some(i) => i,
-            None => return Err("Didn't find a path argument."),
-        };
-
-         Ok(Config { path })
-    }
-}
+use std::{fs, process, env};
 
 fn main() {
-    
+    let args: Vec<String> = env::args().collect();
+    let discs: Vec<String> = args
+        .iter()
+        .map(|path| fs::read_to_string(path)
+            .unwrap_or_else(|err| {
+                println!("ERROR parsing arguments: {}", err);
+                process::exit(1);
+            })
+        )
+        .collect();
+    risc_vm::run(discs).unwrap_or_else(|err| {
+        println!("Application ERROR: {}", err);
+        process::exit(2);
+    });
 }
