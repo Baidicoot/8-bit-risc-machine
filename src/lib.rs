@@ -12,35 +12,14 @@ struct Machine {
     registers: [u8; REGISTERS],
     prgcount: u8, //index on disc
     dsccount: u8, //current disc
-    isactive: bool, //is it on or not?
+    isactive: bool, //is the processor running?
 }
 
-pub fn run(program: Vec<String>) ->Result<(), &'static str> {
-    let mut vm = Machine { mem: [[0; 256]; DISCS], registers: [0; REGISTERS], prgcount: 0, dsccount: 0, isactive: true, };
-    fn parse_byte(x: &str) -> u8 {
-        u8::from_str_radix(x, 2).unwrap_or_else(|err| {
-            println!("Program ERROR: Couldn't parse {:?} to byte.", x);
-            process::exit(3);
-        })
-    }
-    fn make_len(mut v: Vec<u8>, l: usize) -> Vec<u8> { //code for formatting program
-        if {v.len() == l} {v}
-        else if {v.len() > l} {v[0..l].to_vec()}
-        else {
-            for i in 0..l-v.len() {
-                v.push(0);
-            }
-            v
-        }
-    }
-    fn format(bytes: Vec<u8>) -> [u8; 256] { //more code for formatting raw program
-        let mut array = [0; 256];
-        array.copy_from_slice(&bytes[..256]);
-        array
-    }
+pub fn run(program: Vec<[u8; 256]>) ->Result<(), &'static str> {
+    let mut vm = Machine { mem: [[0; 256]; DISCS], registers: [0; REGISTERS], prgcount: 0, dsccount: 0, isactive: true, }; //initialise vm
     for (i, v) in program.iter().enumerate() {
-        vm.loaddsc(i as u8, format(make_len(v.split(|d| (d == ' ') || (d == '\n') || (d == '\r')).filter(|b| (b.len() > 0)).map(parse_byte).collect(), 256)))?;
-        if {i > 2} {
+        vm.loaddsc(i as u8, *v)?;
+        if {i > 2} { //write max of 3 discs
             break
         }
     }
