@@ -11,13 +11,26 @@ fn force_len(mut v: Vec<u8>, l: usize) -> Vec<u8> { //force len of vec
     }
 }
 
-fn force_disc(v: Vec<u8>) -> [u8; 256] {
+fn force_disc(mut v: Vec<u8>) -> [u8; 256] {
     let mut arr = [0; 256];
     arr.copy_from_slice(&force_len(v, 256));
     arr
 }
 
-pub fn debug(path: &String) -> Vec<[u8; 256]> { //returns a disc
+pub fn bytes(path: &String) -> Vec<[u8; 256]> { //read bytes from a file
+    fs::read(path)
+        .unwrap_or_else(|err| {
+            println!("Argument ERROR: {}", err);
+            process::exit(1);
+        })
+        .split(|b| (b == &0b11111111))
+        .map(|d| {
+            force_disc(d.to_vec())
+        })
+        .collect()
+}
+
+pub fn debug(path: &String) -> Vec<[u8; 256]> { //read a risc debug executable
     fn parse_byte(x: &str) -> u8 {
         u8::from_str_radix(x, 2).unwrap_or_else(|err| {
             println!("Format ERROR: Couldn't parse {:?} to byte.", x);

@@ -29,6 +29,7 @@ pub fn run(program: Vec<[u8; 256]>) ->Result<(), &'static str> {
         //println!("Initiating instruction: {:?} {:?} {:?} at position: {:?} {:?}", ins[0], ins[1], ins[2], vm.dsccount, vm.prgcount);
         match ins[0] {
             0b00000000 => vm.end_END()?,
+            //stuff here is special chars for assembly
             0b00001000 ... 0b00001111 => vm.ram_SAV_DIV(ins[1], ins[2], ins[0]&0b00000111)?,
             0b00010000 ... 0b00010111 => vm.ram_SAV_DIR(ins[1], ins[2], ins[0]&0b00000111)?,
             0b00011000 ... 0b00011111 => vm.ram_SAV_DRV(ins[1], ins[2], ins[0]&0b00000111)?,
@@ -70,6 +71,7 @@ pub fn run(program: Vec<[u8; 256]>) ->Result<(), &'static str> {
             0b10000010 => vm.goto_UNCON_DR(ins[1], ins[2])?,
             0b10000011 => vm.goto_UNCON_RI(ins[1], ins[2])?,
             0b10000100 => vm.goto_UNCON_RR(ins[1], ins[2])?,
+            //stuff here is special chars for assembly
             0b10001000 ... 0b10001111 => vm.goto_ZRO_DRI(ins[1], ins[2], ins[0]&0b00000111)?,
             0b10010000 ... 0b10010111 => vm.goto_ZRO_DRR(ins[1], ins[2], ins[0]&0b00000111)?,
             0b10011000 ... 0b10011111 => vm.goto_ZRO_RRI(ins[1], ins[2], ins[0]&0b00000111)?,
@@ -78,6 +80,7 @@ pub fn run(program: Vec<[u8; 256]>) ->Result<(), &'static str> {
             0b10110000 ... 0b10110111 => vm.goto_NZRO_DRR(ins[1], ins[2], ins[0]&0b00000111)?,
             0b10111000 ... 0b10111111 => vm.goto_NZRO_RRI(ins[1], ins[2], ins[0]&0b00000111)?,
             0b11000000 ... 0b11000111 => vm.goto_NZRO_RRR(ins[1], ins[2], ins[0]&0b00000111)?,
+            //stuff here is special chars for assembly
             _ => vm.end_END()?
         }
         if {vm.mem(4, 1)? != 0} {
