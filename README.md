@@ -5,7 +5,7 @@ The machine is like any normal 8-bit computer, except that the fundamental flaw 
 ## How to use
 Currently supported commands are:
 ```
-run - runs a .red file
+run - runs a .red or .rex file
 ```
 For an example try:
 ```
