@@ -7,6 +7,10 @@ Currently supported commands are:
 ```
 run - runs a .red file
 ```
+For an example try:
+```
+cargo run run example.red
+```
 ## FAQ
 ### WHY
 Because I couldn't be bothered to learn assembly, so I decided to create my own.
