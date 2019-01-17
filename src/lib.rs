@@ -4,8 +4,8 @@ fn u8ify(b: bool) -> u8 {
     if b {1} else {0}
 }
 
-pub const DISCS: usize = 8;
-pub const REGISTERS: usize = DISCS; //because they have to be accessable in the same number of bytes
+pub const DISCS: usize = 7;
+pub const REGISTERS: usize = 8; //because they have to be accessable in the same number of bytes
 
 struct Machine {
     mem: [[u8; 256]; DISCS], //four port memory: port 1 is RAM and input/output, port 2 is the removable disc, the rest is the hard drive
@@ -13,10 +13,11 @@ struct Machine {
     prgcount: u8, //index on disc
     dsccount: u8, //current disc
     isactive: bool, //is the processor running?
+    jmp: bool, //has a goto just been called?
 }
 
 pub fn run(program: Vec<[u8; 256]>) ->Result<(), &'static str> {
-    let mut vm = Machine { mem: [[0; 256]; DISCS], registers: [0; REGISTERS], prgcount: 0, dsccount: 0, isactive: true, }; //initialise vm
+    let mut vm = Machine { mem: [[0; 256]; DISCS], registers: [0; REGISTERS], prgcount: 0, dsccount: 0, isactive: true, jmp: false, }; //initialise vm
     for (i, v) in program.iter().enumerate() {
         vm.loaddsc(i as u8, *v)?;
         if {i > 2} { //write max of 3 discs
@@ -349,13 +350,14 @@ impl Machine {
     }
 
     fn goto(&mut self, i: u8, d: u8) -> Result<(), &'static str> { //set program pos (byte; not word) & disc
+        self.jmp = true;
         self.prgcount = i;
         self.dsccount = self.getdsc(d)?;
         Ok(())
     }
 
     fn getdsc(&self, d: u8) -> Result<u8, &'static str> { //get disc
-        if {d==0} {Ok(self.dsccount)} else {Ok(d-1)}
+        if {d > 7} {Err("Disc specified does not exist.")} else if {d==7} {Ok(self.dsccount)} else {Ok(d)}
     }
 
     fn loaddsc(&mut self, d: u8, f: [u8; 256]) -> Result<(), &'static str> {
@@ -364,8 +366,13 @@ impl Machine {
     }
 
     fn next_ins(&mut self) -> Result<(), &'static str> {
-        self.prgcount += 3;
-        Ok(())
+        if {self.jmp} {
+            self.jmp = false;
+            Ok(())
+        } else {
+            self.prgcount += 3;
+            Ok(())
+        }
     }
 
 }

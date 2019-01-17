@@ -29,7 +29,7 @@ pub fn debug(path: &String) -> Vec<[u8; 256]> { //returns a disc
             println!("Argument ERROR: {}", err);
             process::exit(1);
         })
-        .split(|d| (d == 'd'))
+        .split(|d| (d == '-'))
         .map(|d| {
             force_disc(
                 d.to_string()
