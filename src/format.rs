@@ -11,7 +11,7 @@ fn force_len(mut v: Vec<u8>, l: usize) -> Vec<u8> { //force len of vec
     }
 }
 
-fn force_disc(mut v: Vec<u8>) -> [u8; 256] {
+fn force_disc(v: Vec<u8>) -> [u8; 256] {
     let mut arr = [0; 256];
     arr.copy_from_slice(&force_len(v, 256));
     arr
@@ -45,7 +45,7 @@ pub fn debug(path: &String) -> Vec<[u8; 256]> { //read a risc debug executable
         .split(|d| (d == '-'))
         .map(|d| {
             force_disc(
-                d.to_string()
+                String::from(d)
                     .split(|d| (d == ' ') || (d == '\n') || (d == '\r'))
                     .filter(|d| (d.len() > 0))
                     .map(parse_byte)
