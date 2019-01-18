@@ -9,8 +9,9 @@ run - runs a .red or .rex file
 ```
 For an example try:
 ```
-cargo run run example.red
+cargo run --release run example.red
 ```
+N.B. Please run the release version, otherwise overflow will be disabled, and result in a panic.
 ## FAQ
 ### WHY
 Because I couldn't be bothered to learn assembly, so I decided to create my own.

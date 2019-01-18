@@ -4,7 +4,7 @@ fn u8ify(b: bool) -> u8 {
     if b {1} else {0}
 }
 
-pub const DISCS: usize = 7;
+pub const DISCS: usize = 8;
 pub const REGISTERS: usize = 8; //because they have to be accessable in the same number of bytes
 
 struct Machine {
@@ -67,10 +67,12 @@ pub fn run(program: Vec<[u8; 256]>) ->Result<(), &'static str> {
             0b01111110 => vm.cmp_EQL_RR(ins[1], ins[2])?,
             0b01111111 => vm.cmp_NEQL_RV(ins[1], ins[2])?,
             0b10000000 => vm.cmp_NEQL_RR(ins[1], ins[2])?,
-            0b10000001 => vm.goto_UNCON_DI(ins[1], ins[2])?,
-            0b10000010 => vm.goto_UNCON_DR(ins[1], ins[2])?,
-            0b10000011 => vm.goto_UNCON_RI(ins[1], ins[2])?,
-            0b10000100 => vm.goto_UNCON_RR(ins[1], ins[2])?,
+            0b10000001 => vm.reg_SET_RV(ins[1], ins[2])?,
+            0b10000010 => vm.reg_SET_RR(ins[1], ins[2])?,
+            0b10000011 => vm.goto_UNCON_DI(ins[1], ins[2])?,
+            0b10000100 => vm.goto_UNCON_DR(ins[1], ins[2])?,
+            0b10000101 => vm.goto_UNCON_RI(ins[1], ins[2])?,
+            0b10000110 => vm.goto_UNCON_RR(ins[1], ins[2])?,
             //stuff here is special chars for assembly
             0b10001000 ... 0b10001111 => vm.goto_ZRO_DRI(ins[1], ins[2], ins[0]&0b00000111)?,
             0b10010000 ... 0b10010111 => vm.goto_ZRO_DRR(ins[1], ins[2], ins[0]&0b00000111)?,
@@ -87,6 +89,7 @@ pub fn run(program: Vec<[u8; 256]>) ->Result<(), &'static str> {
             print!("{}", vm.mem(4, 0)? as char);
             vm.sav(4, 1, 0)?;
         }
+        print!("{:?}\n", vm.reg(0)?);
         vm.next_ins()?;
     }
     Ok(())
@@ -148,6 +151,14 @@ impl Machine {
 
     fn ram_LOAD_RRR(&mut self, r1: u8, r2: u8, r3: u8) -> Result<(), &'static str> {
         self.set(r2, self.mem(self.reg(r3)?, r2)?)
+    }
+
+    fn reg_SET_RV(&mut self, r1: u8, v: u8) -> Result<(), &'static str> {
+        self.set(r1, v)
+    }
+
+    fn reg_SET_RR(&mut self, r1: u8, r2: u8) -> Result<(), &'static str> {
+        self.set(r1, self.reg(r2)?)
     }
 
     fn alu_SUB_RV(&mut self, r: u8, v: u8) -> Result<(), &'static str> {
@@ -360,7 +371,7 @@ impl Machine {
     }
 
     fn getdsc(&self, d: u8) -> Result<u8, &'static str> { //get disc
-        if {d > 7} {Err("Disc specified does not exist.")} else if {d==7} {Ok(self.dsccount)} else {Ok(d)}
+        if {d > 7} {Err("Disc specified does not exist.")} else {Ok(d)}
     }
 
     fn loaddsc(&mut self, d: u8, f: [u8; 256]) -> Result<(), &'static str> {
