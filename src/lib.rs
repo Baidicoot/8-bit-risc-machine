@@ -89,7 +89,6 @@ pub fn run(program: Vec<[u8; 256]>) ->Result<(), &'static str> {
             print!("{}", vm.mem(4, 0)? as char);
             vm.sav(4, 1, 0)?;
         }
-        print!("{:?}\n", vm.reg(0)?);
         vm.next_ins()?;
     }
     Ok(())
