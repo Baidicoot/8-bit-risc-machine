@@ -1,0 +1,39 @@
+SAVE :4 0 H
+SAVE :4 1 1
+
+SAVE :4 0 e
+SAVE :4 1 1
+
+SAVE :4 0 l
+SAVE :4 1 1
+
+SAVE :4 0 l
+SAVE :4 1 1
+
+SAVE :4 0 o
+SAVE :4 1 1
+
+SAVE :4 0 32
+SAVE :4 1 1
+
+JMP 0 :1
+---
+SAVE :4 0 W
+SAVE :4 1 1
+
+SAVE :4 0 o
+SAVE :4 1 1
+
+SAVE :4 0 r
+SAVE :4 1 1
+
+SAVE :4 0 l
+SAVE :4 1 1
+
+SAVE :4 0 d
+SAVE :4 1 1
+
+SAVE :4 0 33
+SAVE :4 1 1
+
+END

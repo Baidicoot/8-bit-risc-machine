@@ -1,5 +1,3 @@
-use std::process;
-
 fn u8ify(b: bool) -> u8 {
     if b {1} else {0}
 }
@@ -370,7 +368,7 @@ impl Machine {
     }
 
     fn getdsc(&self, d: u8) -> Result<u8, &'static str> { //get disc
-        if {d > 7} {Err("Disc specified does not exist.")} else {Ok(d)}
+        if {d > 7} {Err("Fatal Error: Disc does not exist.")} else {Ok(d)}
     }
 
     fn loaddsc(&mut self, d: u8, f: [u8; 256]) -> Result<(), &'static str> {

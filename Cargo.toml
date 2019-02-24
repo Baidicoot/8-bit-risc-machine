@@ -1,7 +1,9 @@
 [package]
 name = "risc_vm"
-version = "0.1.1"
+version = "1.0.0"
 authors = ["Baidicoot/Aidan Ewart"]
 edition = "2018"
 
 [dependencies]
+regex = "1"
+lazy_static = "1.2"
