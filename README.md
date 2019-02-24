@@ -18,5 +18,5 @@ I couldn't be bothered to implement wrapping.
 ## FAQ
 ### Why the hell don't you have wrapping?
 I'm lazy.
-### WHY
+### Why did you make this? Seriously, why?
 Because I couldn't be bothered to learn assembly, so I decided to create my own.
