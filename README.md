@@ -6,12 +6,17 @@ The machine is like any normal 8-bit computer, except that the fundamental flaw 
 Currently supported commands are:
 ```
 run - runs a .red or .rex file
+compile - compiles a .rasm file to a specified location
 ```
 For an example try:
 ```
 cargo run --release run example.red
 ```
 N.B. Please run the release version, otherwise overflow will be disabled, and result in a panic.
+Yeah, I know.
+I couldn't be bothered to implement wrapping.
 ## FAQ
+### Why the hell don't you have wrapping?
+I'm lazy.
 ### WHY
 Because I couldn't be bothered to learn assembly, so I decided to create my own.
