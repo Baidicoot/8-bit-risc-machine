@@ -1,7 +1,7 @@
-SAVE :4 0 H
-SAVE :4 1 1
+SAVE :4 0 H // load 'H'
+SAVE :4 1 1 // print 'H'
 
-SAVE :4 0 e
+SAVE :4 0 e // ditto
 SAVE :4 1 1
 
 SAVE :4 0 l
@@ -16,7 +16,7 @@ SAVE :4 1 1
 SAVE :4 0 32
 SAVE :4 1 1
 
-JMP 0 :1
+JMP 0 :1 // pointless test jump
 ---
 SAVE :4 0 W
 SAVE :4 1 1

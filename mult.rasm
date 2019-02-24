@@ -1,0 +1,16 @@
+SET @1 2 # load values
+SET @2 4 # into registers
+
+# Loop while first value != 0
+ADD @3 @2 # Increment counter by second value
+SET @3 @0
+SUB @1 1 # Decrement first value
+SET @1 @0
+JNZ :0 @1 6 # Loop
+
+ADD @3 48 # Convert value into text equiv.
+
+SAVE :4 0 @0 # Output
+SAVE :4 1 1  #  Text
+
+END

@@ -1,3 +1,9 @@
+#![allow(non_snake_case)]
+#![allow(dead_code)]
+#![allow(unused_variables)]
+#![allow(unused_parens)]
+use std::num::Wrapping;
+
 fn u8ify(b: bool) -> u8 {
     if b {1} else {0}
 }
@@ -159,23 +165,23 @@ impl Machine {
     }
 
     fn alu_SUB_RV(&mut self, r: u8, v: u8) -> Result<(), &'static str> {
-        self.set(0, self.reg(r)?-v)
+        self.set(0, (Wrapping(self.reg(r)?)-Wrapping(v)).0)
     }
 
     fn alu_SUB_VR(&mut self, v: u8, r: u8) -> Result<(), &'static str> {
-        self.set(0, v-self.reg(r)?)
+        self.set(0, (Wrapping(v)-Wrapping(self.reg(r)?)).0)
     }
 
     fn alu_SUB_RR(&mut self, r1: u8, r2: u8) -> Result<(), &'static str> {
-        self.set(0, self.reg(r1)?-self.reg(r2)?)
+        self.set(0, (Wrapping(self.reg(r1)?)-Wrapping(self.reg(r2)?)).0)
     }
 
     fn alu_ADD_RV(&mut self, r1: u8, v: u8) -> Result<(), &'static str> {
-        self.set(0, self.reg(r1)?-v)
+        self.set(0, (Wrapping(self.reg(r1)?)+Wrapping(v)).0)
     }
 
     fn alu_ADD_RR(&mut self, r1: u8, r2: u8) -> Result<(), &'static str> {
-        self.set(0, self.reg(r1)?+self.reg(r2)?)
+        self.set(0, (Wrapping(self.reg(r1)?)+Wrapping(self.reg(r2)?)).0)
     }
 
     fn alu_OR_RV(&mut self, r1: u8, v: u8) -> Result<(), &'static str> {
@@ -381,7 +387,7 @@ impl Machine {
             self.jmp = false;
             Ok(())
         } else {
-            self.prgcount += 3;
+            self.prgcount = (Wrapping(self.prgcount)+Wrapping(3)).0;
             Ok(())
         }
     }

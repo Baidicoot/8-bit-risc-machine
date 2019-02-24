@@ -1,4 +1,5 @@
 #![feature(duration_as_u128)]
+#![allow(unused_variables)]
 #[macro_use] extern crate lazy_static;
 extern crate risc_vm;
 mod format;

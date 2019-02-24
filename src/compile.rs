@@ -2,7 +2,6 @@ extern crate regex;
 extern crate risc_vm;
 use risc_vm::{DISCS, REGISTERS};
 use regex::{RegexBuilder, Regex};
-use std::collections::HashMap;
 
 fn reg(s: &str) -> Regex {
     RegexBuilder::new(s)
@@ -12,7 +11,10 @@ fn reg(s: &str) -> Regex {
 }
 
 lazy_static!{
-    static ref INS: Regex = reg(r"([A-Z]+) ([\w:@ ]+)");
+    static ref INS: Regex = reg(r"^\s*([A-Z]+) ([\w:@ ]+)");
+
+    static ref COMMENT: Regex = reg(r"^\s*#.*$");
+    static ref WHITESPACE: Regex = reg(r"^\s*$");
 
     static ref DVV: Regex = reg(r":(\w+) (\w+) (\w+)");   //
     static ref DVR: Regex = reg(r":(\w+) (\w+) @(\w+)");  // Block
@@ -508,9 +510,6 @@ pub fn rasm(path: &str) -> Result<Vec<u8>, String> {
     let discs: Vec<Vec<&str>> = content.split("---")
         .map(|y| {
             y.lines()
-            .filter(|x| {
-                x != &""
-            })
             .collect()
         })
         .collect();
@@ -520,6 +519,9 @@ pub fn rasm(path: &str) -> Result<Vec<u8>, String> {
     for (disc_index, d) in discs.iter().enumerate() {
         let mut disc = vec![];
         for (ins_index, i) in d.iter().enumerate() {
+            if COMMENT.is_match(i) || WHITESPACE.is_match(i) {
+                continue;
+            }
             let iterator = match line(i) {
                 Ok(x) => x,
                 Err(err) => return Err(format!("Errored at `{}` on disc {} at line {}.", err, disc_index, ins_index)),

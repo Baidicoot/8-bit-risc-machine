@@ -1,0 +1,37 @@
+# factorial program
+SET @7 4 # load in value
+
+SUB @7 1  #  set
+SET @6 @0 # counter
+
+# while counter != 0
+
+    # mult @6*@7
+
+    SET @1 @7
+    SET @2 @6
+
+    # while @1 != 0
+
+        ADD @3 @2 # Increment counter by second value
+        SET @3 @0
+        SUB @1 1 # Decrement first value
+        SET @1 @0
+
+    JNZ :0 @1 15 # Loop
+
+    SET @7 @3 # set current value to output
+
+    SUB @6 1  # decrement
+    SET @6 @0 #  counter
+
+    SET @3 0 # cleanup
+
+JNZ :0 @6 9 # loop
+
+ADD @7 48 # convert output into text equiv.
+
+SAVE :4 0 @0 # Output
+SAVE :4 1 1  #  Text
+
+END
